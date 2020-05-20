@@ -17,22 +17,23 @@
 @import 'map';
 @import 'codemirror';
 @import 'react-collapse';
+@import 'geocore';
 
 /**
  * Hacks for webdriverio isVisibleWithinViewport
  */
 #app {
-  height: 100vh;
+	height: 100vh;
 }
 
 .maputnik-layout {
-  height: 100vh;
+	height: 100vh;
 }
 
 .react-icons {
-  vertical-align: middle;
-  width: 14px;
-  height: 14px;
+	vertical-align: middle;
+	width: 14px;
+	height: 14px;
 }
 
 .maputnik-data-spec-property {
