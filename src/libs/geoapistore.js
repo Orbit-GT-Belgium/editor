@@ -50,7 +50,6 @@ export class ApiStyleStore {
 		if (this.latestStyleId) {
 			axios.get(this.localUrl + "styles/" + this.activeLayerId).then(response => {
 				const { data: { data } } = response;
-				console.log(data);
 				cb(style.ensureStyleValidity(data));
 			});
 		} else {
@@ -59,27 +58,20 @@ export class ApiStyleStore {
 	}
 	onSave = () => {
 		console.log(this.updatedStyle);
+		axios
+			.put(this.localUrl + "styles/" + this.activeLayerId, { style: this.updatedStyle })
+			.then(response => {
+				const { data: { data: { done } } } = response;
+				console.log("save done?", done);
+			})
+			.catch(e => {
+				console.log("Save failed because:", e);
+			});
 	};
 
 	// Save current style replacing previous version
 	save(mapStyle) {
 		this.updatedStyle = mapStyle;
-		console.log("auto-save", mapStyle);
-
-		/* const styleJSON = mapStyle;
-		console.log("save", mapStyle);
-
-		const id = mapStyle.id;
-		fetch(this.localUrl + "styles/" + id, {
-			method: "PUT",
-			mode: "cors",
-			headers: {
-				"Content-Type": "application/json; charset=utf-8"
-			},
-			body: styleJSON
-		}).catch(function(error) {
-			if (error) console.error(error);
-		}); */
 		return mapStyle;
 	}
 }
