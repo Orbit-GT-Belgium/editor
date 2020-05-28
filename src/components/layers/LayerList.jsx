@@ -35,6 +35,8 @@ function findClosestCommonPrefix(layers, idx) {
   return closestIdx
 }
 
+let UID = 0;
+
 // List of collapsible layer editors
 class LayerListContainer extends React.Component {
   static propTypes = {...layerListPropTypes}
@@ -49,6 +51,9 @@ class LayerListContainer extends React.Component {
     this.state = {
       collapsedGroups: {},
       areAllGroupsExpanded: false,
+      keys: {
+        add: UID++,
+      },
       isOpen: {
         add: false,
       }
@@ -57,6 +62,10 @@ class LayerListContainer extends React.Component {
 
   toggleModal(modalName) {
     this.setState({
+      keys: {
+        ...this.state.keys,
+        [modalName]: UID++,
+      },
       isOpen: {
         ...this.state.isOpen,
         [modalName]: !this.state.isOpen[modalName]
@@ -91,9 +100,18 @@ class LayerListContainer extends React.Component {
 
   groupedLayers() {
     const groups = []
+    const layerIdCount = new Map();
+
     for (let i = 0; i < this.props.layers.length; i++) {
+      const origLayer = this.props.layers[i];
       const previousLayer = this.props.layers[i-1]
-      const layer = this.props.layers[i]
+      layerIdCount.set(origLayer.id,
+        layerIdCount.has(origLayer.id) ? layerIdCount.get(origLayer.id) + 1 : 0
+      );
+      const layer = {
+        ...origLayer,
+        key: `layers-list-${origLayer.id}-${layerIdCount.get(origLayer.id)}`,
+      }
       if(previousLayer && layerPrefix(previousLayer.id) == layerPrefix(layer.id)) {
         const lastGroup = groups[groups.length - 1]
         lastGroup.push(layer)
@@ -191,14 +209,13 @@ class LayerListContainer extends React.Component {
 
     const listItems = []
     let idx = 0
-    const layerIdCount = new Map();
-
     const layersByGroup = this.groupedLayers();
     layersByGroup.forEach(layers => {
       const groupPrefix = layerPrefix(layers[0].id)
       if(layers.length > 1) {
         const grp = <LayerListGroup
           data-wd-key={[groupPrefix, idx].join('-')}
+          aria-controls={layers.map(l => l.key).join(" ")}
           key={`group-${groupPrefix}-${idx}`}
           title={groupPrefix}
           isActive={!this.isCollapsed(groupPrefix, idx) || idx === this.props.selectedLayerIndex}
@@ -223,10 +240,6 @@ class LayerListContainer extends React.Component {
           additionalProps.ref = this.selectedItemRef;
         }
 
-        layerIdCount.set(layer.id,
-          layerIdCount.has(layer.id) ? layerIdCount.get(layer.id) + 1 : 0
-        );
-        const key = `${layer.id}-${layerIdCount.get(layer.id)}`;
         const listItem = <LayerListItem
           className={classnames({
             'maputnik-layer-list-item-collapsed': layers.length > 1 && this.isCollapsed(groupPrefix, groupIdx) && idx !== this.props.selectedLayerIndex,
@@ -234,7 +247,7 @@ class LayerListContainer extends React.Component {
             'maputnik-layer-list-item--error': !!layerError
           })}
           index={idx}
-          key={key}
+          key={layer.key}
           layerId={layer.id}
           layerIndex={idx}
           layerType={layer.type}
@@ -251,8 +264,14 @@ class LayerListContainer extends React.Component {
       })
     })
 
-    return <div className="maputnik-layer-list" ref={this.scrollContainerRef}>
+    return <div
+      className="maputnik-layer-list"
+      role="complementary"
+      aria-label="Layers list"
+      ref={this.scrollContainerRef}
+    >
       <AddModal
+          key={this.state.keys.add}
           layers={this.props.layers}
           sources={this.props.sources}
           isOpen={this.state.isOpen.add}
@@ -265,7 +284,7 @@ class LayerListContainer extends React.Component {
         <div className="maputnik-default-property">
           <div className="maputnik-multibutton">
             <button
-              id="skip-menu"
+              id="skip-target-layer-list"
               onClick={this.toggleLayers}
               className="maputnik-button">
               {this.state.areAllGroupsExpanded === true ? "Collapse" : "Expand"}
@@ -283,7 +302,10 @@ class LayerListContainer extends React.Component {
           </div>
         </div>
       </header>
-      <ul className="maputnik-layer-list-container">
+      <ul className="maputnik-layer-list-container"
+        role="navigation"
+        aria-label="Layers list"
+      >
         {listItems}
       </ul>
     </div>

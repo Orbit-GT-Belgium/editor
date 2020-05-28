@@ -1,31 +1,29 @@
-# Maputnik
+<img width="200" alt="Maputnik logo" src="https://cdn.jsdelivr.net/gh/maputnik/design/logos/logo-color.png" />
 
-[![Build Status](https://circleci.com/gh/maputnik/editor/tree/master.svg?style=shield)][circleci]
-[![Windows Build Status](https://ci.appveyor.com/api/projects/status/anelbgv6jdb3qnh9/branch/master?svg=true)][appveyor]
-[![Dependency Status](https://david-dm.org/maputnik/editor.svg)][dm-prod]
-[![Dev Dependency Status](https://david-dm.org/maputnik/editor/dev-status.svg)][dm-dev]
+# Maputnik
+[![GitHub CI status](https://github.com/maputnik/editor/workflows/ci/badge.svg)][github-action-ci]
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)][license]
 
-[circleci]:    https://circleci.com/gh/maputnik/editor/tree/master
-[appveyor]:    https://ci.appveyor.com/project/lukasmartinelli/editor
-[dm-prod]:     https://david-dm.org/maputnik/editor
-[dm-dev]:      https://david-dm.org/maputnik/editor?type=dev
-[license]:     https://tldrlegal.com/license/mit-license
-
-<img width="200" align="right" alt="Maputnik" src="https://cdn.jsdelivr.net/gh/maputnik/editor@1.5.0/src/img/maputnik.png" />
+[github-action-ci]: https://github.com/maputnik/editor/actions?query=workflow%3Aci
+[license]:          https://tldrlegal.com/license/mit-license
 
 A free and open visual editor for the [Mapbox GL styles](https://www.mapbox.com/mapbox-gl-style-spec/)
 targeted at developers and map designers.
 
+
+## Usage
+
 - :link: Design your maps online at **<https://maputnik.github.io/editor/>** (all in local storage)
 - :link: Use the [Maputnik CLI](https://github.com/maputnik/editor/wiki/Maputnik-CLI) for local style development
+- In a Docker, run this command and browse to http://localhost:8888, Ctrl+C to stop the server.
 
-Mapbox has built one of the best and most amazing OSS ecosystems. A key component to ensure its longevity and independence is an OSS map designer.
-
+```bash
+docker run -it --rm -p 8888:8888 maputnik/editor
+```
 
 ## Donations
+Mapbox has built one of the best and most amazing OSS ecosystems. A key component to ensure its longevity and independence is an OSS map designer.
 If you or your organisation has seen value from Maputnik, please consider donating at <https://maputnik.github.io/donate>
-
 
 ## Documentation
 
