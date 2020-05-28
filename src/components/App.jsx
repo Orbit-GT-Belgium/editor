@@ -433,6 +433,10 @@ export default class App extends React.Component {
 		this.fetchSources();
 	};
 
+	onSave = e => {
+		this.styleStore.onSave();
+	};
+
 	onUndo = () => {
 		const activeStyle = this.revisionStore.undo();
 
@@ -742,6 +746,7 @@ export default class App extends React.Component {
 				onStyleOpen={this.onStyleChanged}
 				onSetMapState={this.setMapState}
 				onToggleModal={this.toggleModal.bind(this)}
+				onSave={this.onSave}
 			/>
 		);
 
