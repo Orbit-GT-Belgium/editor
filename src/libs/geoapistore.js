@@ -5,7 +5,7 @@ import axios from "axios";
 
 export class ApiStyleStore {
 	constructor(opts) {
-		this.onLocalStyleChange = opts.onLocalStyleChange || (() => {});
+		this.onLocalStyleChange = opts.onLocalStyleChange || (() => { });
 		this.localUrl = opts.apiUrl;
 		this.activeLayerId = opts.layerId;
 		this.websocketUrl = `ws://localhost:8000/ws`;
@@ -16,7 +16,7 @@ export class ApiStyleStore {
 
 	init(cb) {
 		axios
-			.get(this.localUrl + "styles/" + this.activeLayerId)
+			.get(this.localUrl + this.activeLayerId)
 			.then(response => {
 				const { data } = response;
 				console.log(data);
@@ -48,7 +48,7 @@ export class ApiStyleStore {
 
 	latestStyle(cb) {
 		if (this.latestStyleId) {
-			axios.get(this.localUrl + "styles/" + this.activeLayerId).then(response => {
+			axios.get(this.localUrl + this.activeLayerId).then(response => {
 				const { data: { data } } = response;
 				cb(style.ensureStyleValidity(data));
 			});
@@ -59,7 +59,7 @@ export class ApiStyleStore {
 	onSave = () => {
 		console.log(this.updatedStyle);
 		axios
-			.put(this.localUrl + "styles/" + this.activeLayerId, { style: this.updatedStyle })
+			.put(this.localUrl + this.activeLayerId, { style: this.updatedStyle })
 			.then(response => {
 				const { data: { data: { done } } } = response;
 				console.log("save done?", done);
