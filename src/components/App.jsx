@@ -317,6 +317,10 @@ export default class App extends React.Component {
       ...opts
     };
 
+    if (opts.initialLoad) {
+      this.getInitialStateFromUrl(newStyle);
+    }
+
     const errors = validate(newStyle, latest) || [];
 
     // The validate function doesn't give us errors for duplicate error with
@@ -430,6 +434,7 @@ export default class App extends React.Component {
       errors: mappedErrors,
     }, () => {
       this.fetchSources();
+      this.setStateInUrl();
     })
 
     this.fetchSources();
