@@ -329,6 +329,7 @@ export default class App extends React.Component {
     }
 
     const errors = validate(newStyle, latest) || [];
+    console.log("errors", errors);
 
     // The validate function doesn't give us errors for duplicate error with
     // empty string for layer.id, manually deal with that here.

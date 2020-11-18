@@ -1,4 +1,30 @@
-button[data-wd-key="nav:open"] {
+/*** GENERAL ***/
+html {
+  color: #0F0F0F;
+}
+
+/*** SCROLLBAR ***/
+*:not(select) {
+  &::-webkit-scrollbar {
+    background-color: #f2f2f2;
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 6px;
+    -webkit-box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.3);
+    background-color: #e5e5e5;
+    padding-left: 2px;
+    padding-right: 2px;
+  }
+  
+  // Styling for Firefox
+  scrollbar-width: thin;
+  scrollbar-color: #717171 #e5e5e5;
+}
+
+/*button[data-wd-key="nav:open"] {
 	display: none;
 }
 button[data-wd-key="nav:export"] {
@@ -9,10 +35,156 @@ button[data-wd-key="nav:sources"] {
 }
 button[data-wd-key="nav:settings"] {
 	display: none;
-}
+}*/
 .maputnik-toolbar {
-	//background-color: $color-primary-gecoreviewer;
+  background-color: $color-primary-geocoreviewer;
 }
 .maputnik-toolbar-logo {
-	//background-color: $color-primary-gecoreviewer;
+  background-color: $color-primary-geocoreviewer;
+  display: none;
+}
+.maputnik-toolbar-link:hover, .maputnik-toolbar-action:hover, .maputnik-toolbar-select:hover {
+  background-color: $color-primary-dark-geocoreviewer;
+}
+.maputnik-layout {
+  text-transform: uppercase;
+  color: #000000;
+}
+.maputnik-layout-list, .maputnik-layout-drawer, .maputnik-layer-editor-group, .layer-header {
+  background-color: $color-secondary-geocoreviewer;
+}
+.maputnik-layout-drawer {
+  border-left: 1px solid $color-primary-geocoreviewer;
+}
+.maputnik-layer-list .maputnik-layer-list-item:hover, .maputnik-layer-list .maputnik-layer-list-item-selected {
+  background-color: #f2f2f2;
+}
+.maputnik-default-property .maputnik-multibutton .maputnik-button-selected {
+  background-color: #f2f2f2;
+  color: #000000;
+}
+.maputnik-default-property .maputnik-multibutton .maputnik-button, .maputnik-default-property .maputnik-multibutton .maputnik-radio-as-button {
+  background-color: #e5e5e5;
+  color: #000000;
+}
+.maputnik-layer-editor-group {
+  border-top: solid 1px $color-primary-geocoreviewer;
+  color: #000000;
+}
+.maputnik-layer-editor-group:hover {
+  background-color: #cccccc;
+}
+*:focus {
+  outline: -webkit-focus-ring-color auto 0px !important;
+}
+input:focus, select:focus {
+  color: #000000 !important;
+  outline: #8e8e8e auto 1px !important;
+}
+.maputnik-toolbar-skip {
+  background-color: transparent;
+}
+.maputnik-layer-list-item-selected, .maputnik-layer-list-item-handle, .maputnik-layer-list-header-title {
+  color: #000000;
+}
+.maputnik-input, .maputnik-string, .maputnik-number, .maputnik-color, .maputnik-select, .maputnik-checkbox-wrapper {
+  background-color: #f2f2f2;
+}
+.maputnik-checkbox-box {
+  background-color: #f2f2f2;
+}
+.maputnik-select {
+  color: #000000;
+  background: #f2f2f2 url("data:image/svg+xml;charset=utf-8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'><path fill='black' d='M7,10L12,15L17,10H7Z' /></svg>") right center no-repeat;
+}
+.maputnik-input-block-label {
+  color: #3f3f3f;
+}
+.maputnik-default-property .maputnik-input-block-label {
+  color: #717171;
+}
+.maputnik-default-property .maputnik-string, .maputnik-default-property .maputnik-number, .maputnik-default-property .maputnik-color, .maputnik-default-property .maputnik-select, .maputnik-default-property .maputnik-checkbox-wrapper {
+  background-color: #f9f9f9;
+}
+.maputnik-button, .maputnik-radio-as-button {
+  background-color: #e5e5e5;
+  color: #3f3f3f;
+}
+.maputnik-make-zoom-function, .maputnik-make-data-function {
+  background-color: $color-secondary-geocoreviewer;
+}
+.maputnik-autocomplete-menu-item-selected {
+  background: #e5e5e5;
+}
+.maputnik-autocomplete-menu-item {
+  color: #000000;
+  background: #f2f2f2;
+}
+.CodeMirror-gutter {
+  background-color: $color-secondary-geocoreviewer;
+}
+.cm-s-maputnik span.cm-string, .cm-s-maputnik span.cm-string-2 {
+  color: #004b7f;
+}
+.cm-s-maputnik span.cm-string:last-child, .cm-s-maputnik span.cm-string-2:last-child {
+  color: #ec619f;
+}
+.cm-s-maputnik span.cm-string:only-child, .cm-s-maputnik span.cm-string-2:only-child {
+  color: #004b7f;
+}
+.maputnik-string--disabled {
+  background: transparent;
+  border: none;
+}
+.maputnik-doc-wrapper:hover {
+  color: #000000;
+}
+.maputnik-doc-button {
+  background: #ffffff;
+  color: #000000;
+}
+.maputnik-button:hover {
+  color: #000000;
+}
+.maputnik-icon-button:hover:not(:disabled) svg, .maputnik-delete-filter:hover:not(:disabled) svg, .maputnik-make-zoom-function:hover:not(:disabled) svg, .maputnik-delete-stop:hover:not(:disabled) svg, .maputnik-make-data-function:hover:not(:disabled) svg {
+  fill: #000000;
+}
+.maputnik-doc-inline {
+  color: #3f3f3f;
+  background-color: #f2f2f2;
+}
+.maputnik-expr-infobox {
+  background: #f2f2f2;
+  color: #000000;
+}
+.maputnik-public-style-button:hover {
+  background-color: #f2f2f2;
+}
+.maputnik-public-style {
+  background-color: #ffffff;
+}
+
+/*** MODAL ***/
+.maputnik-modal {
+  background-color: #ffffff;
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.3);
+}
+.maputnik-modal-header {
+  background-color: #f2f2f2;
+}
+.maputnik-modal-header-toggle {
+  color: #0F0F0F;
+}
+
+
+/*** MAP ***/
+.mapboxgl-ctrl-group {
+  background: rgb(255, 255, 255) !important;
+}
+.mapboxgl-ctrl-zoom {
+  color: #000000 !important;
+}
+.mapboxgl-ctrl-group > button {
+  background-color: rgb(255, 255, 255) !important;
+  border-color: rgb(235, 235, 235) !important;
 }

@@ -279,7 +279,7 @@ export default class AppToolbar extends React.Component {
             </label>
           </ToolbarSelect>
 
-          <ToolbarLink href={"https://github.com/maputnik/editor/wiki"}>
+          {/*<ToolbarLink href={"https://github.com/maputnik/editor/wiki"}>
             <MdHelpOutline />
             <IconText>Help</IconText>
           </ToolbarLink>
@@ -287,6 +287,10 @@ export default class AppToolbar extends React.Component {
             <MdAssignmentTurnedIn />
             <IconText>Take the Maputnik Survey</IconText>
           </ToolbarLinkHighlighted>
+          </ToolbarLink>*/}
+          <div style={{ color: "#ffffff", display: "inline-block", float: "right", height: 40, lineHeight: "20px", fontSize: "12px", padding: 10 }}>
+            Powered by Maputnik v{pkgJson.version}
+          </div>
         </div>
       </div>
     </nav>
