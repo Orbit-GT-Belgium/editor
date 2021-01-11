@@ -1,86 +1,88 @@
-import autoBind from "react-autobind";
-import React from "react";
-import cloneDeep from "lodash.clonedeep";
-import clamp from "lodash.clamp";
-import get from "lodash.get";
-import { unset } from "lodash";
-import arrayMove from "array-move";
-import url from "url";
+import autoBind from 'react-autobind';
+import React from 'react'
+import cloneDeep from 'lodash.clonedeep'
+import clamp from 'lodash.clamp'
+import get from 'lodash.get'
+import {unset} from 'lodash'
+import arrayMove from 'array-move'
+import url from 'url'
+import hash from "string-hash";
 
-import MapboxGlMap from "./map/MapboxGlMap";
-import OpenLayersMap from "./map/OpenLayersMap";
-import LayerList from "./layers/LayerList";
-import LayerEditor from "./layers/LayerEditor";
-import Toolbar from "./Toolbar";
-import AppLayout from "./AppLayout";
-import MessagePanel from "./MessagePanel";
+import MapMapboxGl from './MapMapboxGl'
+import MapOpenLayers from './MapOpenLayers'
+import LayerList from './LayerList'
+import LayerEditor from './LayerEditor'
+import AppToolbar from './AppToolbar'
+import AppLayout from './AppLayout'
+import MessagePanel from './AppMessagePanel'
 
-import SettingsModal from "./modals/SettingsModal";
-import ExportModal from "./modals/ExportModal";
-import SourcesModal from "./modals/SourcesModal";
-import OpenModal from "./modals/OpenModal";
-import ShortcutsModal from "./modals/ShortcutsModal";
-import SurveyModal from "./modals/SurveyModal";
-import DebugModal from "./modals/DebugModal";
+import ModalSettings from './ModalSettings'
+import ModalExport from './ModalExport'
+import ModalSources from './ModalSources'
+import ModalOpen from './ModalOpen'
+import ModalShortcuts from './ModalShortcuts'
+import ModalSurvey from './ModalSurvey'
+import ModalDebug from './ModalDebug'
 
-import { downloadGlyphsMetadata, downloadSpriteMetadata } from "../libs/metadata";
-import { latest, validate } from "@mapbox/mapbox-gl-style-spec";
-import style from "../libs/style";
-import { initialStyleUrl, loadStyleUrl, removeStyleQuerystring } from "../libs/urlopen";
-import { undoMessages, redoMessages } from "../libs/diffmessage";
-import { StyleStore } from "../libs/stylestore";
-import { ApiStyleStore } from "../libs/geoapistore";
-import { RevisionStore } from "../libs/revisions";
-import LayerWatcher from "../libs/layerwatcher";
-import tokens from "../config/tokens.json";
-import isEqual from "lodash.isequal";
-import Debug from "../libs/debug";
-import queryUtil from "../libs/query-util";
-import { formatLayerId } from "./util/format";
+import { downloadGlyphsMetadata, downloadSpriteMetadata } from '../libs/metadata'
+import {latest, validate} from '@mapbox/mapbox-gl-style-spec'
+import style from '../libs/style'
+import { initialStyleUrl, loadStyleUrl, removeStyleQuerystring } from '../libs/urlopen'
+import { undoMessages, redoMessages } from '../libs/diffmessage'
+import { StyleStore } from '../libs/stylestore'
+import { ApiStyleStore } from '../libs/geoapistore'
+import { RevisionStore } from '../libs/revisions'
+import LayerWatcher from '../libs/layerwatcher'
+import tokens from '../config/tokens.json'
+import isEqual from 'lodash.isequal'
+import Debug from '../libs/debug'
+import queryUtil from '../libs/query-util'
+import {formatLayerId} from '../util/format';
 
-import MapboxGl from "mapbox-gl";
+import MapboxGl from 'mapbox-gl'
+
 
 // Similar functionality as <https://github.com/mapbox/mapbox-gl-js/blob/7e30aadf5177486c2cfa14fe1790c60e217b5e56/src/util/mapbox.js>
 function normalizeSourceURL(url, apiToken = "") {
-  const matches = url.match(/^mapbox:\/\/(.*)/);
-  if (matches) {
-    // mapbox://mapbox.mapbox-streets-v7
-    return `https://api.mapbox.com/v4/${matches[1]}.json?secure&access_token=${apiToken}`;
-  } else {
-    return url;
-  }
+	const matches = url.match(/^mapbox:\/\/(.*)/);
+	if (matches) {
+		// mapbox://mapbox.mapbox-streets-v7
+		return `https://api.mapbox.com/v4/${matches[1]}.json?secure&access_token=${apiToken}`;
+	} else {
+		return url;
+	}
 }
 
 function setFetchAccessToken(url, mapStyle) {
-  const matchesTilehosting = url.match(/\.tilehosting\.com/);
-  const matchesMaptiler = url.match(/\.maptiler\.com/);
-  const matchesThunderforest = url.match(/\.thunderforest\.com/);
-  if (matchesTilehosting || matchesMaptiler) {
-    const accessToken = style.getAccessToken("openmaptiles", mapStyle, { allowFallback: true });
-    if (accessToken) {
-      return url.replace("{key}", accessToken);
-    }
-  } else if (matchesThunderforest) {
-    const accessToken = style.getAccessToken("thunderforest", mapStyle, { allowFallback: true });
-    if (accessToken) {
-      return url.replace("{key}", accessToken);
-    }
-  } else {
-    return url;
-  }
+	const matchesTilehosting = url.match(/\.tilehosting\.com/);
+	const matchesMaptiler = url.match(/\.maptiler\.com/);
+	const matchesThunderforest = url.match(/\.thunderforest\.com/);
+	if (matchesTilehosting || matchesMaptiler) {
+		const accessToken = style.getAccessToken("openmaptiles", mapStyle, { allowFallback: true });
+		if (accessToken) {
+			return url.replace("{key}", accessToken);
+		}
+	} else if (matchesThunderforest) {
+		const accessToken = style.getAccessToken("thunderforest", mapStyle, { allowFallback: true });
+		if (accessToken) {
+			return url.replace("{key}", accessToken);
+		}
+	} else {
+		return url;
+	}
 }
 
 function updateRootSpec(spec, fieldName, newValues) {
-  return {
-    ...spec,
-    $root: {
-      ...spec.$root,
-      [fieldName]: {
-        ...spec.$root[fieldName],
-        values: newValues
-      }
-    }
-  };
+	return {
+		...spec,
+		$root: {
+			...spec.$root,
+			[fieldName]: {
+				...spec.$root[fieldName],
+				values: newValues
+			}
+		}
+	};
 }
 
 export default class App extends React.Component {
@@ -94,14 +96,24 @@ export default class App extends React.Component {
     if (port == null && (window.location.port != 80 && window.location.port != 443)) {
       port = window.location.port;
     }
-    this.styleStore = new ApiStyleStore({
-      onLocalStyleChange: mapStyle => this.onStyleChanged(mapStyle, { save: false }),
+    /*this.styleStore = new ApiStyleStore({
+      onLocalStyleChange: mapStyle => this.onStyleChanged(mapStyle, {save: false}),
       port: port,
       apiUrl: params.get("apiUrl"),
       token: params.get("token"),
       layerId: params.get("layerId"),
       host: params.get("localhost")
-    });
+    })*/
+
+    this.styleStore = new ApiStyleStore({
+			onLocalStyleChange: mapStyle => this.onStyleChanged(mapStyle, { save: false }),
+			port: port,
+			apiUrl: params.get("apiUrl"),
+			token: params.get("token"),
+			layerId: params.get("layerId"),
+			host: params.get("localhost")
+		});
+
 
     const shortcuts = [
       {
@@ -184,7 +196,7 @@ export default class App extends React.Component {
           console.log("Falling back to local storage for storing styles");
           this.styleStore = new StyleStore();
         }
-        this.styleStore.latestStyle(mapStyle => this.onStyleChanged(mapStyle));
+        this.styleStore.latestStyle(mapStyle => this.onStyleChanged(mapStyle, {initialLoad: true}))
 
         if (Debug.enabled()) {
           Debug.set("maputnik", "styleStore", this.styleStore);
@@ -314,10 +326,16 @@ export default class App extends React.Component {
     opts = {
       save: true,
       addRevision: true,
-      ...opts
+      initialLoad: false,
+      ...opts,
     };
 
+    if (opts.initialLoad) {
+      this.getInitialStateFromUrl(newStyle);
+    }
+
     const errors = validate(newStyle, latest) || [];
+    console.log("errors", errors);
 
     // The validate function doesn't give us errors for duplicate error with
     // empty string for layer.id, manually deal with that here.
@@ -430,14 +448,15 @@ export default class App extends React.Component {
       errors: mappedErrors,
     }, () => {
       this.fetchSources();
+      this.setStateInUrl();
     })
 
     this.fetchSources();
   }
 
-  onSave = e => {
+  onSave = () => {
     this.styleStore.onSave();
-  };
+  }
 
   onUndo = () => {
     const activeStyle = this.revisionStore.undo();
@@ -534,8 +553,8 @@ export default class App extends React.Component {
   setMapState = newState => {
     this.setState({
       mapState: newState
-    });
-  };
+    }, this.setStateInUrl);
+  }
 
   setDefaultValues = styleObj => {
     const metadata = styleObj.metadata || {};
@@ -659,26 +678,20 @@ export default class App extends React.Component {
     let mapElement;
 
     // Check if OL code has been loaded?
-    if (renderer === "ol") {
-      mapElement = (
-        <OpenLayersMap
-          {...mapProps}
-          onChange={this.onMapChange}
-          debugToolbox={this.state.openlayersDebugOptions.debugToolbox}
-          onLayerSelect={this.onLayerSelect}
-        />
-      );
+    if(renderer === 'ol') {
+      mapElement = <MapOpenLayers
+        {...mapProps}
+        onChange={this.onMapChange}
+        debugToolbox={this.state.openlayersDebugOptions.debugToolbox}
+        onLayerSelect={this.onLayerSelect}
+      />
     } else {
-      mapElement = (
-        <MapboxGlMap
-          {...mapProps}
-          onChange={this.onMapChange}
-          options={this.state.mapboxGlDebugOptions}
-          inspectModeEnabled={this.state.mapState === "inspect"}
-          highlightedLayer={this.state.mapStyle.layers[this.state.selectedLayerIndex]}
-          onLayerSelect={this.onLayerSelect}
-        />
-      );
+      mapElement = <MapMapboxGl {...mapProps}
+        onChange={this.onMapChange}
+        options={this.state.mapboxGlDebugOptions}
+        inspectModeEnabled={this.state.mapState === "inspect"}
+        highlightedLayer={this.state.mapStyle.layers[this.state.selectedLayerIndex]}
+        onLayerSelect={this.onLayerSelect} />
     }
 
     let filterName;
@@ -697,9 +710,92 @@ export default class App extends React.Component {
     );
   }
 
-  onLayerSelect = index => {
-    this.setState({ selectedLayerIndex: index });
-  };
+  setStateInUrl = () => {
+    const {mapState, mapStyle, isOpen} = this.state;
+    const {selectedLayerIndex} = this.state;
+    const url = new URL(location.href);
+    const hashVal = hash(JSON.stringify(mapStyle));
+    url.searchParams.set("layer", `${hashVal}~${selectedLayerIndex}`);
+
+    const openModals = Object.entries(isOpen)
+    .map(([key, val]) => (val === true ? key : null))
+    .filter(val => val !== null);
+
+    if (openModals.length > 0) {
+      url.searchParams.set("modal", openModals.join(","));
+    }
+    else {
+      url.searchParams.delete("modal");
+    }
+
+    if (mapState === "map") {
+      url.searchParams.delete("view");
+    }
+    else if (mapState === "inspect") {
+      url.searchParams.set("view", "inspect");
+    }
+
+    history.replaceState({selectedLayerIndex}, "Maputnik", url.href);
+  }
+
+  getInitialStateFromUrl = (mapStyle) => {
+    const url = new URL(location.href);
+    const modalParam = url.searchParams.get("modal");
+    if (modalParam && modalParam !== "") {
+      const modals = modalParam.split(",");
+      const modalObj = {};
+      modals.forEach(modalName => {
+        modalObj[modalName] = true;
+      });
+
+      this.setState({
+        isOpen: {
+          ...this.state.isOpen,
+          ...modalObj,
+        }
+      });
+    }
+
+    const view = url.searchParams.get("view");
+    if (view && view !== "") {
+      this.setMapState(view);
+    }
+
+    const path = url.searchParams.get("layer");
+    if (path) {
+      try {
+        const parts = path.split("~");
+        const [hashVal, selectedLayerIndex] = [
+          parts[0],
+          parseInt(parts[1], 10),
+        ];
+
+        let invalid = false;
+        if (hashVal !== "-") {
+          const currentHashVal = hash(JSON.stringify(mapStyle));
+          if (currentHashVal !== parseInt(hashVal, 10)) {
+            invalid = true;
+          }
+        }
+        if (!invalid) {
+          this.setState({
+            selectedLayerIndex,
+            selectedLayerOriginalId: this.state.mapStyle.layers[selectedLayerIndex].id,
+          });
+        }
+      }
+      catch (err) {
+        console.warn(err);
+      }
+    }
+  }
+
+  onLayerSelect = (index) => {
+    this.setState({
+      selectedLayerIndex: index,
+      selectedLayerOriginalId: this.state.mapStyle.layers[index].id,
+    }, this.setStateInUrl);
+  }
 
   setModal(modalName, value) {
     if (modalName === "survey" && value === false) {
@@ -711,7 +807,7 @@ export default class App extends React.Component {
         ...this.state.isOpen,
         [modalName]: value
       }
-    });
+    }, this.setStateInUrl)
   }
 
   toggleModal(modalName) {
@@ -737,14 +833,89 @@ export default class App extends React.Component {
   };
 
   render() {
-    const layers = this.state.mapStyle.layers || [];
-    const selectedLayer = layers.length > 0 ? layers[this.state.selectedLayerIndex] : null;
-    const metadata = this.state.mapStyle.metadata || {};
+    const layers = this.state.mapStyle.layers || []
+    const selectedLayer = layers.length > 0 ? layers[this.state.selectedLayerIndex] : null
+    const metadata = this.state.mapStyle.metadata || {}
 
-    const toolbar = (
-      <Toolbar
+    const toolbar = <AppToolbar
+      renderer={this._getRenderer()}
+      mapState={this.state.mapState}
+      mapStyle={this.state.mapStyle}
+      inspectModeEnabled={this.state.mapState === "inspect"}
+      sources={this.state.sources}
+      onStyleChanged={this.onStyleChanged}
+      onStyleOpen={this.onStyleChanged}
+      onSetMapState={this.setMapState}
+      onToggleModal={this.toggleModal.bind(this)}
+      onSave={this.onSave}
+    />
+
+    const layerList = <LayerList
+      onMoveLayer={this.onMoveLayer}
+      onLayerDestroy={this.onLayerDestroy}
+      onLayerCopy={this.onLayerCopy}
+      onLayerVisibilityToggle={this.onLayerVisibilityToggle}
+      onLayersChange={this.onLayersChange}
+      onLayerSelect={this.onLayerSelect}
+      selectedLayerIndex={this.state.selectedLayerIndex}
+      layers={layers}
+      sources={this.state.sources}
+      errors={this.state.errors}
+    />
+
+    const layerEditor = selectedLayer ? <LayerEditor
+      key={this.state.selectedLayerOriginalId}
+      layer={selectedLayer}
+      layerIndex={this.state.selectedLayerIndex}
+      isFirstLayer={this.state.selectedLayerIndex < 1}
+      isLastLayer={this.state.selectedLayerIndex === this.state.mapStyle.layers.length-1}
+      sources={this.state.sources}
+      vectorLayers={this.state.vectorLayers}
+      spec={this.state.spec}
+      onMoveLayer={this.onMoveLayer}
+      onLayerChanged={this.onLayerChanged}
+      onLayerDestroy={this.onLayerDestroy}
+      onLayerCopy={this.onLayerCopy}
+      onLayerVisibilityToggle={this.onLayerVisibilityToggle}
+      onLayerIdChange={this.onLayerIdChange}
+      errors={this.state.errors}
+    /> : null
+
+    const bottomPanel = (this.state.errors.length + this.state.infos.length) > 0 ? <MessagePanel
+      currentLayer={selectedLayer}
+      selectedLayerIndex={this.state.selectedLayerIndex}
+      onLayerSelect={this.onLayerSelect}
+      mapStyle={this.state.mapStyle}
+      errors={this.state.errors}
+      infos={this.state.infos}
+    /> : null
+
+
+    const modals = <div>
+      <ModalDebug
         renderer={this._getRenderer()}
-        mapState={this.state.mapState}
+        mapboxGlDebugOptions={this.state.mapboxGlDebugOptions}
+        openlayersDebugOptions={this.state.openlayersDebugOptions}
+        onChangeMaboxGlDebug={this.onChangeMaboxGlDebug}
+        onChangeOpenlayersDebug={this.onChangeOpenlayersDebug}
+        isOpen={this.state.isOpen.debug}
+        onOpenToggle={this.toggleModal.bind(this, 'debug')}
+        mapView={this.state.mapView}
+      />
+      <ModalShortcuts
+        ref={(el) => this.shortcutEl = el}
+        isOpen={this.state.isOpen.shortcuts}
+        onOpenToggle={this.toggleModal.bind(this, 'shortcuts')}
+      />
+      <ModalSettings
+        mapStyle={this.state.mapStyle}
+        onStyleChanged={this.onStyleChanged}
+        onChangeMetadataProperty={this.onChangeMetadataProperty}
+        isOpen={this.state.isOpen.settings}
+        onOpenToggle={this.toggleModal.bind(this, 'settings')}
+        openlayersDebugOptions={this.state.openlayersDebugOptions}
+      />
+      <ModalExport
         mapStyle={this.state.mapStyle}
         inspectModeEnabled={this.state.mapState === "inspect"}
         sources={this.state.sources}
@@ -754,110 +925,30 @@ export default class App extends React.Component {
         onToggleModal={this.toggleModal.bind(this)}
         onSave={this.onSave}
       />
-    );
-
-    const layerList = (
-      <LayerList
-        onMoveLayer={this.onMoveLayer}
-        onLayerDestroy={this.onLayerDestroy}
-        onLayerCopy={this.onLayerCopy}
-        onLayerVisibilityToggle={this.onLayerVisibilityToggle}
-        onLayersChange={this.onLayersChange}
-        onLayerSelect={this.onLayerSelect}
-        selectedLayerIndex={this.state.selectedLayerIndex}
-        layers={layers}
-        sources={this.state.sources}
-        errors={this.state.errors}
+      <ModalOpen
+        isOpen={this.state.isOpen.open}
+        onStyleOpen={this.openStyle}
+        onOpenToggle={this.toggleModal.bind(this, 'open')}
       />
-    );
-
-    const layerEditor = selectedLayer ? (
-      <LayerEditor
-        key={selectedLayer.id}
-        layer={selectedLayer}
-        layerIndex={this.state.selectedLayerIndex}
-        isFirstLayer={this.state.selectedLayerIndex < 1}
-        isLastLayer={this.state.selectedLayerIndex === this.state.mapStyle.layers.length - 1}
-        sources={this.state.sources}
-        vectorLayers={this.state.vectorLayers}
-        spec={this.state.spec}
-        onMoveLayer={this.onMoveLayer}
-        onLayerChanged={this.onLayerChanged}
-        onLayerDestroy={this.onLayerDestroy}
-        onLayerCopy={this.onLayerCopy}
-        onLayerVisibilityToggle={this.onLayerVisibilityToggle}
-        onLayerIdChange={this.onLayerIdChange}
-        errors={this.state.errors}
+      <ModalSources
+        mapStyle={this.state.mapStyle}
+        onStyleChanged={this.onStyleChanged}
+        isOpen={this.state.isOpen.sources}
+        onOpenToggle={this.toggleModal.bind(this, 'sources')}
       />
-    ) : null;
-
-    const bottomPanel =
-      this.state.errors.length + this.state.infos.length > 0 ? (
-        <MessagePanel
-          currentLayer={selectedLayer}
-          selectedLayerIndex={this.state.selectedLayerIndex}
-          onLayerSelect={this.onLayerSelect}
-          mapStyle={this.state.mapStyle}
-          errors={this.state.errors}
-          infos={this.state.infos}
-        />
-      ) : null;
-
-    const modals = (
-      <div>
-        <DebugModal
-          renderer={this._getRenderer()}
-          mapboxGlDebugOptions={this.state.mapboxGlDebugOptions}
-          openlayersDebugOptions={this.state.openlayersDebugOptions}
-          onChangeMaboxGlDebug={this.onChangeMaboxGlDebug}
-          onChangeOpenlayersDebug={this.onChangeOpenlayersDebug}
-          isOpen={this.state.isOpen.debug}
-          onOpenToggle={this.toggleModal.bind(this, "debug")}
-          mapView={this.state.mapView}
-        />
-        <ShortcutsModal
-          ref={el => (this.shortcutEl = el)}
-          isOpen={this.state.isOpen.shortcuts}
-          onOpenToggle={this.toggleModal.bind(this, "shortcuts")}
-        />
-        <SettingsModal
-          mapStyle={this.state.mapStyle}
-          onStyleChanged={this.onStyleChanged}
-          onChangeMetadataProperty={this.onChangeMetadataProperty}
-          isOpen={this.state.isOpen.settings}
-          onOpenToggle={this.toggleModal.bind(this, "settings")}
-          openlayersDebugOptions={this.state.openlayersDebugOptions}
-        />
-        <ExportModal
-          mapStyle={this.state.mapStyle}
-          onStyleChanged={this.onStyleChanged}
-          isOpen={this.state.isOpen.export}
-          onOpenToggle={this.toggleModal.bind(this, "export")}
-        />
-        <OpenModal
-          isOpen={this.state.isOpen.open}
-          onStyleOpen={this.openStyle}
-          onOpenToggle={this.toggleModal.bind(this, "open")}
-        />
-        <SourcesModal
-          mapStyle={this.state.mapStyle}
-          onStyleChanged={this.onStyleChanged}
-          isOpen={this.state.isOpen.sources}
-          onOpenToggle={this.toggleModal.bind(this, "sources")}
-        />
-        <SurveyModal isOpen={this.state.isOpen.survey} onOpenToggle={this.toggleModal.bind(this, "survey")} />
-      </div>
-    );
-
-    return (
-      <AppLayout
-        toolbar={toolbar}
-        layerList={layerList}
-        layerEditor={layerEditor}
-        map={this.mapRenderer()}
-        bottom={bottomPanel}
-        modals={modals}
+      <ModalSurvey
+        isOpen={this.state.isOpen.survey}
+        onOpenToggle={this.toggleModal.bind(this, 'survey')}
       />
-    );
+    </div>
+
+    return <AppLayout
+      toolbar={toolbar}
+      layerList={layerList}
+      layerEditor={layerEditor}
+      map={this.mapRenderer()}
+      bottom={bottomPanel}
+      modals={modals}
+    />
   }
 }
