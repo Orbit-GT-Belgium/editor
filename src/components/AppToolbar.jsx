@@ -124,6 +124,7 @@ export default class AppToolbar extends React.Component {
     onSetMapState: PropTypes.func,
     mapState: PropTypes.string,
     renderer: PropTypes.string,
+    onSave: PropTypes.func,
   }
 
   state = {
@@ -234,6 +235,10 @@ export default class AppToolbar extends React.Component {
           </a>
         </div>
         <div className="maputnik-toolbar__actions" role="navigation" aria-label="Toolbar">
+          <ToolbarAction wdKey="save:open" onClick={this.props.onSave}>
+            <MdSave />
+            <IconText>Save</IconText>
+          </ToolbarAction>
           <ToolbarAction wdKey="nav:open" onClick={this.props.onToggleModal.bind(this, 'open')}>
             <MdOpenInBrowser />
             <IconText>Open</IconText>

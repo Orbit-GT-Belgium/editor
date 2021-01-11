@@ -3,6 +3,16 @@ html {
   color: #0F0F0F;
 }
 
+input:focus,
+textarea:focus,
+*[role="button"]:focus,
+button:focus,
+.maputnik-toolbar-link:focus,
+select:focus {
+  color: $color-black;
+  outline: #8e8e8e auto 1px;
+}
+
 /*** SCROLLBAR ***/
 *:not(select) {
   &::-webkit-scrollbar {
@@ -24,7 +34,7 @@ html {
   scrollbar-color: #717171 #e5e5e5;
 }
 
-/*button[data-wd-key="nav:open"] {
+button[data-wd-key="nav:open"] {
 	display: none;
 }
 button[data-wd-key="nav:export"] {
@@ -35,9 +45,9 @@ button[data-wd-key="nav:sources"] {
 }
 button[data-wd-key="nav:settings"] {
 	display: none;
-}*/
+}
 .maputnik-toolbar {
-  background-color: $color-primary-geocoreviewer;
+  background-color: $color-midgray;
 }
 .maputnik-toolbar-logo {
   background-color: $color-primary-geocoreviewer;
@@ -132,6 +142,10 @@ input:focus, select:focus {
 .cm-s-maputnik span.cm-string:only-child, .cm-s-maputnik span.cm-string-2:only-child {
   color: #004b7f;
 }
+.cm-s-maputnik .CodeMirror-matchingbracket {
+  background: transparent;
+  color: #004b7f !important;
+}
 .maputnik-string--disabled {
   background: transparent;
   border: none;
@@ -162,6 +176,88 @@ input:focus, select:focus {
 }
 .maputnik-public-style {
   background-color: #ffffff;
+}
+.SpecDoc__values code {
+  background: $color-lowestgray;
+  padding: 0.1em 0.3em;
+  border-radius: 2px;
+}
+.maputnik-data-fieldset-inner {
+  background: $color-lowestgray !important;
+  border: solid 1px $color-midgray;
+  border-radius: 2px;
+  position: relative;
+
+  // HACK: Overide
+  .maputnik-input-block {
+    margin: $margin-2;
+  }
+
+  .maputnik-add-stop {
+    display: inline-block;
+    float: none;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  .maputnik-toolbox {
+    margin: $margin-3;
+    margin-top: $margin-3;
+    text-align: right;
+  }
+
+}
+
+.more-menu {
+  &__menu {
+    background: $color-lowestgray;
+    cursor: pointer;
+  }
+}
+
+/*** BUTTON ***/
+.maputnik-button {
+
+  &:hover {
+    background-color: lighten($color-midgray, 12);
+    color: $color-white;
+  }
+
+}
+
+/*** LAYER LIST ***/
+.maputnik-layer-list {
+  height: 100%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+
+  &-group-header {
+    border: solid 1px transparent;
+    font-size: $font-size-6;
+    color: $color-white;
+    background-color: $color-primary-dark-geocoreviewer;
+    user-select: none;
+    padding: $margin-2;
+
+    &:focus-within {
+      border: solid 1px $color-lowgray;
+    }
+
+    button {
+      all: unset;
+      cursor: pointer;
+    }
+
+    @include flex-row;
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
 }
 
 /*** MODAL ***/

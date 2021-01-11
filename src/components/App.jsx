@@ -30,7 +30,7 @@ import style from '../libs/style'
 import { initialStyleUrl, loadStyleUrl, removeStyleQuerystring } from '../libs/urlopen'
 import { undoMessages, redoMessages } from '../libs/diffmessage'
 import { StyleStore } from '../libs/stylestore'
-import { ApiStyleStore } from '../libs/apistore'
+import { ApiStyleStore } from '../libs/geoapistore'
 import { RevisionStore } from '../libs/revisions'
 import LayerWatcher from '../libs/layerwatcher'
 import tokens from '../config/tokens.json'
@@ -96,11 +96,20 @@ export default class App extends React.Component {
     if (port == null && (window.location.port != 80 && window.location.port != 443)) {
       port = window.location.port
     }
-    this.styleStore = new ApiStyleStore({
+    /*this.styleStore = new ApiStyleStore({
       onLocalStyleChange: mapStyle => this.onStyleChanged(mapStyle, {save: false}),
       port: port,
       host: params.get("localhost")
-    })
+    })*/
+
+    this.styleStore = new ApiStyleStore({
+			onLocalStyleChange: mapStyle => this.onStyleChanged(mapStyle, { save: false }),
+			port: port,
+			apiUrl: params.get("apiUrl"),
+			token: params.get("token"),
+			layerId: params.get("layerId"),
+			host: params.get("localhost")
+		});
 
 
     const shortcuts = [
@@ -449,6 +458,10 @@ export default class App extends React.Component {
       this.setStateInUrl();
     })
 
+  }
+
+  onSave = () => {
+    this.styleStore.onSave();
   }
 
   onUndo = () => {
@@ -839,6 +852,7 @@ export default class App extends React.Component {
       onStyleOpen={this.onStyleChanged}
       onSetMapState={this.setMapState}
       onToggleModal={this.toggleModal.bind(this)}
+      onSave={this.onSave}
     />
 
     const layerList = <LayerList
